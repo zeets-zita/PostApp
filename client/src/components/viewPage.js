@@ -16,7 +16,7 @@ class View extends Component {
    }
 
    getMessages = () => {
-    fetch("http://localhost:5000/get-messages")
+    fetch("/get-messages")
        .then(res => res.json())
        .then(json => {
           this.setState({

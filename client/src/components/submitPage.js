@@ -9,22 +9,56 @@ import {
 } from 'reactstrap';
 
 
+
+function validate(name, email, number, msg) {
+
+   const errors = [];
+ 
+   if (name.length === 0) {
+     errors.push("Name can't be empty");
+   }
+ 
+   if (number.length < 6) {
+     errors.push("Password should be at least 6 characters long");
+   }
+ 
+   if (email.split("").filter(x => x === "@").length !== 1) {
+     errors.push("Email should contain a @");
+   }
+ 
+   if (msg.length === 0) {
+     errors.push("Name can't be empty");
+   }
+ 
+   return errors;
+ }
+
+ 
 class Submit extends Component {
    state = {
       name: "",
       number: "",
       email: "",
-      msg: ""
+      msg: "",
+      errors: []
    }
 
-   onChange = (e) => {
+ onChange = (e) => {
     this.setState({ [e.target.name]: e.target.value });
   }
 
  onSubmit = (e) => {
     e.preventDefault();
-    console.log(this.state.name, this.state.number, this.state.email, this.state.msg, this.state.date);
-    fetch("http://localhost:5000/new-message", {
+
+    const { name, email, number, msg } = this.state;
+
+    const errors = validate(name, email, number, msg);
+    if (errors.length > 0) {
+      this.setState({ errors });
+      return;
+    }
+
+    fetch("/new-message", {
        method: "POST",
        headers: {
           'accept': 'application/json',
@@ -36,7 +70,7 @@ class Submit extends Component {
           email: this.state.email,
           date: this.state.date,
           msg: this.state.msg
-          .replace(/\e/, '')
+          .replace('e', '')
           .split("")
           .reverse()
           .join("")
@@ -45,7 +79,9 @@ class Submit extends Component {
     this.props.history.push('/view')
  }
 
+
    render() {
+    const { errors } = this.state;
       return (
         <div className="post-form sm-2 submit-container" style={{ marginTop: '90px', margin: '20px'}}>
           <Link to="/view" className="btn btn-light mb-3"
@@ -53,6 +89,9 @@ class Submit extends Component {
                 >View Messages</Link>
            <Col md={6} sm={6} xs={8} className="m-auto">
              <Form onSubmit={this.onSubmit}>
+             {errors.map(error => (
+              <p key={error}>Error: {error}</p>
+               ))}
               <FormGroup>
                <Input
                   type="text"
